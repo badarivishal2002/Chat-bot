@@ -1,50 +1,195 @@
 # AI Chat Application
 
-A modern AI chat application similar to Glean AI or NotebookLM, built with Next.js and the Vercel AI SDK.
+A modern AI agent application built with Next.js and the Vercel AI SDK, featuring multi-model LLM support, conversation memory, and extensive tool integrations.
 
 ## Features
 
-### Core Chat Features
-- **Real-time AI Chat**: Powered by OpenAI GPT models with streaming responses
-- **Interactive Chat Interface**: Modern chat UI with typing indicators and message history
-- **Collapsible Sidebar**: Expandable/collapsible navigation for better screen utilization
-- **Responsive Design**: Optimized for mobile, tablet, and desktop devices
+### AI Agent Capabilities
+- **Multi-Model LLM Support**: OpenAI (GPT-4.1, GPT-5, GPT-5.2), Claude 4.5 Sonnet, Gemini 2.5 Flash, DeepSeek, Grok 4.1
+- **Intelligent Tool System**: Automatic tool selection and multi-step reasoning (up to 15 steps)
+- **Conversation Memory**: Semantic search across chat history with Mem0 AI
+- **Web Research**: SERP API integration for web search and Cheerio-based scraping
+- **OAuth Integrations**: GitHub, Google Drive, Gmail, Slack, Jira, Notion, Calendar (via MCP)
+- **Real-time Streaming**: Streaming responses with source attribution and citations
+- **Prompt Caching**: Cost optimization with provider-specific caching strategies
 
-### Authentication System
-- **Login/Early Access Pages**: Complete authentication UI with form validation
-- **Demo Mode**: Bypass authentication for easy testing and demonstration
-- **Seamless Navigation**: Automatic routing between auth and chat interfaces
+### Chat Features
+- **Interactive Chat Interface**: Modern UI with streaming responses and typing indicators
+- **Message Management**: Edit messages, regenerate responses, rollback conversations
+- **Chat Organization**: Projects, folders, search, and filtering
+- **Artifact Detection**: Automatic detection and rendering of code, HTML, React, SVG, diagrams
+- **File Attachments**: Upload and send images, PDFs, documents in chat
+- **Chat Sharing**: Secure sharing with public read-only links
 
-### File Management System
-- **Advanced Upload Modal**: Drag & drop file upload with multiple source options
-- **File Storage**: Persistent file storage using localStorage (demo) with metadata
-- **Document Discovery**: Comprehensive file management and search interface
-- **File Type Support**: PDF, DOCX, Images, Videos, Markdown, and Text files
-- **Cloud Integration Placeholders**: Google Drive and OneDrive integration ready
+### Authentication & User Management
+- **NextAuth Integration**: Secure authentication with JWT sessions
+- **User Accounts**: Registration, login, password reset, trial management
+- **Early Access System**: Controlled onboarding with approval workflow
+- **Session Management**: Persistent sessions with secure token handling
 
-### Enhanced User Interface
-- **Modern Sidebar**: Organized sections for Chat History, Discover, and Upload with scroll support
-- **File Management**: Upload, view, delete, and organize documents
-- **Responsive Upload Modal**: Works seamlessly across all device sizes
-- **Visual File Icons**: Color-coded icons for different file types
-- **Real-time Updates**: Instant UI updates when files are uploaded or deleted
-- **Interactive Chat Management**: Create, delete, and switch between multiple chat sessions
-- **Confirmation Dialogs**: User-friendly prompts for destructive actions
+### Project Management
+- **Project Creation**: Organize chats into projects with categories
+- **Categories**: Investing, homework, writing, health, travel, creative, work, analytics, custom
+- **Chat Assignment**: Add/remove chats from projects
+- **Project Dashboard**: View all chats within a project
 
 ## Tech Stack
 
-- **Framework**: Next.js 14 with App Router
-- **AI/ML**: Vercel AI SDK, OpenAI GPT-3.5-turbo
-- **Styling**: Tailwind CSS, shadcn/ui components
+- **Framework**: Next.js 16.1 (App Router) with TypeScript 5.9
+- **Frontend**: React 19.2, Tailwind CSS, shadcn/ui components
+- **AI/LLM**:
+  - Vercel AI SDK (@ai-sdk/*)
+  - OpenAI, Anthropic Claude, Google Gemini, DeepSeek, xAI Grok
+  - Mem0 AI for conversation memory
+  - Langfuse for LLM monitoring
+- **Backend**: Node.js with Next.js API Routes
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: NextAuth 4.24 with JWT strategy
+- **Integrations**:
+  - SERP API (web search)
+  - Cheerio (web scraping)
+  - MCP tools (OAuth integrations)
 - **Icons**: Lucide React
-- **TypeScript**: Full type safety
+- **Styling**: Tailwind CSS, CSS variables for theming
+
+## Project Structure
+
+```
+metawurks-main-app/
+├── app/                          # Next.js App Router
+│   ├── api/                     # API routes
+│   │   ├── auth/               # Authentication endpoints
+│   │   │   ├── [...nextauth]/  # NextAuth handler
+│   │   │   ├── forgot-password/ # Password reset request
+│   │   │   └── reset-password/ # Password reset confirmation
+│   │   ├── chat/               # Chat endpoints
+│   │   │   ├── [chatId]/       # Chat-specific operations
+│   │   │   ├── history/        # Chat history
+│   │   │   ├── route.ts        # Main chat streaming endpoint
+│   │   │   └── shared/         # Shared chat access
+│   │   ├── integrations/       # OAuth integrations
+│   │   │   ├── auth/           # OAuth flow (initiate, callback)
+│   │   │   ├── [integrationId]/ # Integration management
+│   │   │   ├── refresh-all/    # Token refresh
+│   │   │   └── route.ts        # List/create integrations
+│   │   ├── projects/           # Project management
+│   │   │   ├── [projectId]/    # Project operations
+│   │   │   └── route.ts        # List/create projects
+│   │   ├── signup/             # User registration
+│   │   └── support/            # Support/feedback
+│   ├── chat/                    # Chat interface pages
+│   │   ├── [id]/               # Individual chat page
+│   │   ├── shared/             # Shared chat viewer
+│   │   └── page.tsx            # Chat home
+│   ├── projects/                # Project pages
+│   │   └── [projectId]/        # Project detail page
+│   ├── login/                   # Login page
+│   ├── signup/                  # Signup page
+│   ├── forgot-password/         # Password reset request page
+│   ├── reset-password/          # Password reset page
+│   ├── tools/                   # AI Tools system
+│   │   ├── index.ts            # Tool loader
+│   │   ├── types.ts            # Tool interfaces
+│   │   ├── chat-memory-search.ts # Mem0 integration
+│   │   ├── web-search.ts       # SERP API tool
+│   │   ├── web-scraper.ts      # Cheerio scraper
+│   │   ├── mcp-tools.ts        # MCP integration loader
+│   │   └── README.md           # Tools documentation
+│   ├── layout.tsx               # Root layout
+│   ├── page.tsx                 # Homepage (redirects)
+│   └── globals.css              # Global styles
+├── components/                   # React components
+│   ├── chat/                    # Chat-specific components
+│   │   ├── chat-input.tsx      # Message input with attachments
+│   │   ├── message-item.tsx    # Message rendering
+│   │   └── message-actions.tsx # Message actions (copy, edit, etc.)
+│   ├── ui/                      # shadcn/ui components
+│   │   ├── button.tsx
+│   │   ├── dialog.tsx
+│   │   ├── input.tsx
+│   │   ├── popover.tsx
+│   │   └── scroll-area.tsx
+│   ├── chat-interface.tsx       # Main chat component (52KB)
+│   ├── sidebar.tsx              # Navigation sidebar
+│   ├── model-selector.tsx       # LLM model picker
+│   ├── artifact-panel.tsx       # Code/artifact viewer
+│   ├── code-block.tsx           # Syntax highlighted code
+│   ├── tool-call-card.tsx       # Tool execution display
+│   ├── add-integration-modal.tsx # OAuth integration setup
+│   ├── add-to-project-modal.tsx # Add chat to project
+│   ├── project-list.tsx         # Project sidebar
+│   ├── project-modal.tsx        # Create/edit project
+│   ├── search-chats.tsx         # Chat search
+│   ├── settings-modal.tsx       # User settings
+│   ├── user-integrations.tsx    # Integration management
+│   └── providers.tsx            # Context providers
+├── lib/                          # Utility functions and services
+│   ├── mcp-tools/               # MCP tool implementations
+│   │   ├── tool-executor.ts    # Generic MCP executor
+│   │   ├── github.ts           # GitHub tools
+│   │   ├── google-drive.ts     # Google Drive tools
+│   │   ├── gmail.ts            # Gmail tools
+│   │   ├── google-calendar.ts  # Calendar tools
+│   │   ├── slack.ts            # Slack tools
+│   │   ├── jira.ts             # Jira tools
+│   │   └── notion.ts           # Notion tools
+│   ├── auth.ts                  # NextAuth configuration
+│   ├── db.ts                    # MongoDB connection
+│   ├── chat-service.ts          # Chat persistence
+│   ├── chat-storage.ts          # Chat state management
+│   ├── memory-manager.ts        # Mem0 integration
+│   ├── mem0-client.ts           # Mem0 API client
+│   ├── llm-cache.ts             # Prompt caching
+│   ├── artifact-detector.ts     # Code artifact detection
+│   ├── ai-tools.ts              # AI tool utilities
+│   ├── email.ts                 # Email sending
+│   ├── refresh-token.ts         # OAuth token refresh
+│   ├── integration-middleware.ts # Integration helpers
+│   ├── client-validation.ts     # Form validation
+│   ├── theme-context.tsx        # Theme management
+│   ├── chat-layout-context.tsx  # Chat layout state
+│   └── utils.ts                 # General utilities
+├── models/                       # MongoDB Mongoose models
+│   ├── User.ts                  # User schema
+│   ├── Chat.ts                  # Chat schema
+│   ├── Message.ts               # Message schema
+│   ├── Project.ts               # Project schema
+│   └── Integration.ts           # Integration schema
+├── types/                        # TypeScript types
+│   ├── global.d.ts              # Global type definitions
+│   └── next-auth.d.ts           # NextAuth types
+├── public/                       # Static assets
+│   └── logos/                   # Integration logos
+├── scripts/                      # Utility scripts
+│   └── check-integrations.js    # OAuth integration checker
+├── middleware.ts                 # Next.js middleware (auth)
+├── next.config.js                # Next.js configuration
+├── tailwind.config.js            # Tailwind CSS config
+├── tsconfig.json                 # TypeScript config
+├── package.json                  # Dependencies
+├── Dockerfile                    # Docker configuration
+├── .dockerignore                 # Docker ignore rules
+├── .gitignore                    # Git ignore rules
+├── INTEGRATION_SETUP.md          # OAuth setup guide
+├── REFACTORING_SUMMARY.md        # Code refactoring notes
+└── README.md                     # This file
+```
 
 ## Getting Started
 
+### Prerequisites
+
+- Node.js 18+ and npm
+- MongoDB database (local or MongoDB Atlas)
+- API keys for LLM providers
+- (Optional) API keys for integrations
+
+### Installation
+
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
-   cd ai-chat-app
+   git clone https://github.com/badarivishal2002/Chat-bot.git
+   cd Chat-bot
    ```
 
 2. **Install dependencies**
@@ -53,14 +198,55 @@ A modern AI chat application similar to Glean AI or NotebookLM, built with Next.
    ```
 
 3. **Set up environment variables**
-   Create a `.env.local` file and add your API keys:
-   ```bash
-   cp .env.example .env.local
-   ```
-   
-   Add your OpenAI API key:
-   ```
-   OPENAI_API_KEY=your-openai-api-key-here
+
+   Create a `.env` file in the root directory:
+
+   ```env
+   # Database
+   MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/database
+
+   # Authentication
+   NEXTAUTH_SECRET=your-random-secret-here
+   NEXTAUTH_URL=http://localhost:3000
+
+   # LLM Providers (at least one required)
+   OPENAI_API_KEY=sk-...
+   ANTHROPIC_API_KEY=sk-ant-...
+   GOOGLE_GENERATIVE_AI_API_KEY=...
+   XAI_API_KEY=xai-...
+   DEEPSEEK_API_KEY=sk-...
+
+   # Conversation Memory
+   MEM0_API_KEY=your-mem0-api-key
+
+   # Web Search (optional)
+   SERPAPI_KEY=your-serpapi-key
+
+   # OAuth Integrations (optional)
+   GITHUB_OAUTH_CLIENT_ID=...
+   GITHUB_OAUTH_CLIENT_SECRET=...
+   GOOGLE_OAUTH_CLIENT_ID=...
+   GOOGLE_OAUTH_CLIENT_SECRET=...
+   SLACK_OAUTH_CLIENT_ID=...
+   SLACK_OAUTH_CLIENT_SECRET=...
+   JIRA_OAUTH_CLIENT_ID=...
+   JIRA_OAUTH_CLIENT_SECRET=...
+   NOTION_OAUTH_CLIENT_ID=...
+   NOTION_OAUTH_CLIENT_SECRET=...
+
+   # Email (for password reset)
+   EMAIL_HOST=smtp.gmail.com
+   EMAIL_PORT=587
+   EMAIL_USER=your-email@gmail.com
+   EMAIL_PASSWORD=your-app-password
+   EMAIL_FROM=noreply@yourapp.com
+
+   # Support Email
+   SUPPORT_EMAIL_USER=support@yourapp.com
+   SUPPORT_EMAIL_PASSWORD=your-support-password
+
+   # Early Access (optional)
+   EARLY_ACCESS_VERIFY_URL=https://yoursite.com/api/verify
    ```
 
 4. **Run the development server**
@@ -69,227 +255,345 @@ A modern AI chat application similar to Glean AI or NotebookLM, built with Next.
    ```
 
 5. **Open the application**
+
    Navigate to [http://localhost:3000](http://localhost:3000)
 
-6. **Start using the app**
-   - You'll be redirected to the login page
-   - Enter any email/password (demo mode) to access the chat
-   - Create new chats using the "New Chat" button
-   - Upload files via the sidebar or discover page
-   - Switch between different chat conversations
-   - Delete chats using the trash icon in sidebar or delete button in chat header
-   - Start chatting with the AI assistant
+### First Time Setup
 
-## Project Structure
+1. **Create an account**: Go to `/signup` and register
+2. **Login**: Use your credentials at `/login`
+3. **Start chatting**: Click "New Chat" to begin
+4. **Select a model**: Choose from GPT-4.1, Claude 4.5, Gemini, DeepSeek, or Grok
+5. **Try tools**: Ask the AI to search the web or recall previous conversations
+6. **(Optional) Add integrations**: Connect GitHub, Gmail, Slack, etc. in Settings
 
+## Available AI Models
+
+| Model | Provider | Best For | Speed | Cost |
+|-------|----------|----------|-------|------|
+| **GPT-4.1** | OpenAI | General purpose, balanced | Medium | Medium |
+| **GPT-5** | OpenAI | Complex reasoning | Slower | High |
+| **GPT-5.2** | OpenAI | Latest capabilities | Slower | High |
+| **Claude 4.5 Sonnet** | Anthropic | Writing, analysis, coding | Fast | Medium |
+| **Gemini 2.5 Flash** | Google | Quick tasks, simple queries | Very Fast | Low |
+| **DeepSeek Chat** | DeepSeek | Cost-effective, coding | Fast | Very Low |
+| **Grok 4.1 Reasoning** | xAI | Complex problem-solving | Medium | Medium |
+
+All models support:
+- Tool calling
+- Multi-step reasoning
+- Prompt caching (where available)
+- Streaming responses
+
+## AI Tools System
+
+The application includes a modular tool system that extends the AI's capabilities:
+
+### Built-in Tools
+
+1. **chatMemorySearch** - Search conversation history semantically
+   - Powered by Mem0 AI
+   - Temporal awareness ("last week", "yesterday")
+   - User-scoped memory
+
+2. **webSearch** - Search the web for current information
+   - SERP API integration
+   - Returns titles, URLs, snippets
+   - Source attribution
+
+3. **webScraper** - Extract content from web pages
+   - Cheerio-based parsing
+   - CSS selector support
+   - Metadata extraction
+
+### MCP Integration Tools (OAuth Required)
+
+4. **GitHub** - `github_list_repos`, `github_search_code`, `github_create_issue`, `github_get_user`
+5. **Google Drive** - `drive_list_files`, `drive_search_files`, `drive_get_file_info`
+6. **Gmail** - `gmail_list_messages`, `gmail_search_messages`, `gmail_send_message`, `gmail_get_unread_count`
+7. **Slack** - `slack_list_channels`, `slack_send_message`, `slack_search_messages`, `slack_list_users`
+8. **Google Calendar** - `calendar_list_events`, `calendar_create_event`, `calendar_search_events`
+9. **Jira** - `jira_list_projects`, `jira_list_issues`, `jira_create_issue`, `jira_search_issues`
+10. **Notion** - `notion_search`, `notion_list_pages`, `notion_create_page`, `notion_query_database`
+
+See [app/tools/README.md](app/tools/README.md) for detailed tool documentation.
+
+## Key Features Explained
+
+### Multi-Step Reasoning
+The AI can chain up to 15 tool calls in a single response, allowing complex workflows:
 ```
-ai-chat-app/
-├── app/                    # Next.js App Router
-│   ├── login/             # Authentication login page
-│   ├── early-access/      # Early Access request page
-│   ├── signup/            # (Disabled) legacy registration page
-│   ├── chat/              # Main chat interface
-│   ├── discover/          # Document management and file explorer
-│   ├── api/chat/          # Chat API endpoint with AI integration
-│   ├── layout.tsx         # Root layout with global styles
-│   ├── page.tsx           # Root redirect to login
-│   └── globals.css        # Global styles and design system
-├── components/            # React components
-│   ├── ui/               # shadcn/ui reusable components
-│   │   ├── button.tsx    # Button component with variants
-│   │   ├── input.tsx     # Input component with styling
-│   │   ├── dialog.tsx    # Modal/dialog component
-│   │   └── scroll-area.tsx # Custom scroll area component
-│   ├── sidebar.tsx       # Collapsible navigation sidebar
-│   ├── chat-interface.tsx # Main chat component with AI integration
-│   └── upload-modal.tsx  # File upload modal with drag & drop
-├── lib/                  # Utility functions and services
-│   ├── utils.ts         # General utility functions
-│   └── file-storage.ts  # File management and storage utilities
-└── public/              # Static assets
+User: "Find recent AI news and summarize the top 3 articles"
+→ AI uses webSearch
+→ AI uses webScraper on each article
+→ AI synthesizes results
 ```
 
-## Key Components
+### Conversation Memory
+Powered by Mem0, the AI remembers context across chats:
+```
+User: "What did I say about my project deadline?"
+→ AI searches conversation history semantically
+→ Returns relevant snippets with timestamps
+```
 
-### Authentication System
-- **Login Page** (`/login`): Email/password authentication with demo mode
-- **Early Access Page** (`/early-access`): Controlled onboarding with reCAPTCHA
-- **Auto-redirect**: Seamless navigation between auth and main app
+### Prompt Caching
+Reduces costs by caching system prompts:
+- **Claude**: Ephemeral cache control (5min)
+- **OpenAI GPT-5**: 24-hour retention (75% discount)
+- **Grok**: Automatic caching with conversation ID
+- **Gemini**: Implicit caching (75% discount)
+- **DeepSeek**: Disk caching (90% discount)
 
-### Chat Interface
-- **Real-time AI messaging**: Streaming responses with Vercel AI SDK
-- **File integration**: Upload documents directly in chat
-- **Message history**: Persistent chat sessions and context
-- **Responsive design**: Optimized for all screen sizes
-- **Chat Management**: Create new chats, delete existing ones, and switch between conversations
-- **Dynamic Headers**: Chat titles dynamically update based on selected conversation
+### Artifact Detection
+Automatically detects and renders code:
+- **HTML**: Live preview in iframe
+- **React**: Interactive component rendering
+- **SVG**: Vector graphics display
+- **Mermaid**: Diagram rendering
+- **Code blocks**: Syntax highlighting (50+ lines)
 
-### Advanced Sidebar Navigation
-- **Collapsible design**: Toggle between expanded and collapsed states
-- **Discover section**: Quick access to file management
-- **Upload sources**: Direct file upload from sidebar
-- **Chat history**: Scrollable list of previous conversations with delete options
-- **Account management**: User profile and settings
-- **Active chat highlighting**: Visual indication of currently selected chat
-- **Individual chat actions**: Delete buttons with confirmation for each chat
+### Message Editing
+Edit previous messages and regenerate responses:
+1. Click "Edit" on any message
+2. Modify the text
+3. Messages after the edit are removed
+4. AI generates a new response
 
-### Enhanced Discover Page
-- **File upload modal**: Drag & drop interface with multiple source options
-- **File management**: View, search, filter, and delete uploaded documents
-- **Multiple view modes**: Grid and list views for different preferences
-- **Real-time updates**: Instant refresh when files are uploaded/deleted
-- **Source filtering**: Filter by upload source (Local, Google Drive, OneDrive)
-- **File type icons**: Visual indicators with color coding
+### Chat Sharing
+Share conversations publicly:
+1. Click "Share" button
+2. Copy the secure link
+3. Recipients can view (read-only)
+4. Revoke access anytime
 
-### Upload System
-- **Multi-source support**: Local files, Google Drive, OneDrive (placeholders)
-- **File type validation**: Support for PDF, DOCX, images, videos, markdown, text
-- **Drag & drop interface**: Intuitive file selection with visual feedback
-- **Progress indicators**: Loading states and success/error messages
-- **Persistent storage**: Files saved with metadata for future access
+## Database Schema
+
+### Collections
+
+**Users**
+- `email`, `password` (hashed), `name`
+- `plan`, `isInTrial`, `trialEndDate`
+- `earlyAccessApproved`
+- Password reset tokens
+
+**Chats**
+- `chat_id` (unique), `user_id`, `title`
+- `project_id` (optional)
+- `isShared`, `shareToken`, `sharedAt`
+- Timestamps
+
+**Messages**
+- `chat_id`, `user_id`, `role` (user/assistant/system)
+- `content`, `sources`
+- `edited`, `edited_at`
+- Timestamps
+
+**Projects**
+- `project_id`, `user_id`, `name`
+- `category`, `customCategory`
+- `description`, `chat_ids`
+- Timestamps
+
+**Integrations**
+- `integration_id`, `user_id`, `type`
+- `name`, `description`, `enabled`
+- `config`, `credentials` (encrypted)
+- `last_used`
+
+### Indexes
+- `(user_id, chat_id)` on Chats
+- `(chat_id, timestamp)` on Messages
+- `(user_id, type)` on Integrations
+- `email` (unique) on Users
 
 ## API Routes
 
-### `/api/chat`
-Handles chat messages and AI responses using the Vercel AI SDK and OpenAI. Features include:
-- Streaming text responses
-- Message context management
-- Error handling and fallbacks
-- Custom system prompts for document-aware AI assistance
+### Authentication
+- `POST /api/auth/[...nextauth]` - NextAuth handler
+- `POST /api/signup` - User registration
+- `POST /api/auth/forgot-password` - Request password reset
+- `POST /api/auth/reset-password` - Reset password
 
-## Customization
+### Chat
+- `POST /api/chat` - Send message, get streaming response
+- `GET /api/chat/history` - Get user's chat list
+- `GET /api/chat/[chatId]/messages` - Get chat messages
+- `POST /api/chat/[chatId]/title` - Update chat title
+- `DELETE /api/chat/[chatId]` - Delete chat
+- `POST /api/chat/[chatId]/share` - Share chat
+- `GET /api/chat/shared/[shareToken]` - View shared chat
 
-### Adding New AI Providers
-To use Claude instead of OpenAI, update `app/api/chat/route.ts`:
+### Projects
+- `GET /api/projects` - List user projects
+- `POST /api/projects` - Create project
+- `GET /api/projects/[projectId]` - Get project details
+- `PUT /api/projects/[projectId]` - Update project
+- `DELETE /api/projects/[projectId]` - Delete project
+- `GET /api/projects/[projectId]/chats` - Get project chats
 
-```typescript
-import { anthropic } from '@ai-sdk/anthropic'
+### Integrations
+- `GET /api/integrations` - List user integrations
+- `POST /api/integrations` - Create integration
+- `POST /api/integrations/auth/initiate/[provider]` - Start OAuth flow
+- `GET /api/integrations/auth/callback/[provider]` - OAuth callback
+- `POST /api/integrations/[integrationId]/refresh` - Refresh token
+- `DELETE /api/integrations/[integrationId]` - Delete integration
+- `POST /api/integrations/refresh-all` - Refresh all expired tokens
 
-const result = await streamText({
-  model: anthropic('claude-3-sonnet-20240229'),
-  // ... rest of config
-})
-```
+### Support
+- `POST /api/support` - Submit support request
 
-### Styling
-The application uses Tailwind CSS with custom CSS variables for theming. Modify `app/globals.css` to customize colors and styling.
+## OAuth Integration Setup
 
-### Document Processing
-Currently includes placeholders for document parsing. Integrate with services like:
-- Supabase for storage
-- Pinecone for vector embeddings
-- PDF.js for PDF parsing
+To enable MCP tools, you need to set up OAuth apps. See [INTEGRATION_SETUP.md](INTEGRATION_SETUP.md) for detailed instructions on:
+
+1. Creating OAuth apps for each provider
+2. Setting up redirect URIs
+3. Configuring environment variables
+4. Testing integrations
 
 ## Deployment
 
 ### Vercel (Recommended)
-```bash
-npm run build
-vercel deploy
-```
+
+1. **Push to GitHub**: Your code is already in the repo
+2. **Import to Vercel**: Connect your GitHub repository
+3. **Add environment variables**: Add all variables from `.env`
+4. **Deploy**: Vercel will build and deploy automatically
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/badarivishal2002/Chat-bot)
 
 ### Docker
+
 ```bash
-docker build -t ai-chat-app .
-docker run -p 3000:3000 ai-chat-app
+# Build the image
+docker build -t metawurks-agent .
+
+# Run the container
+docker run -p 3000:3000 --env-file .env metawurks-agent
 ```
 
-## Environment Variables
+### Manual Deployment
 
-- `OPENAI_API_KEY`: Your OpenAI API key (required for AI chat functionality)
-- `ANTHROPIC_API_KEY`: Alternative Anthropic API key (optional)
-- `DATABASE_URL`: Database connection string (for production)
-- `NEXTAUTH_SECRET`: NextAuth secret for authentication (for production)
-- `EARLY_ACCESS_VERIFY_URL`: Absolute URL (e.g., `https://landing.metawurks.com/api/early-access/verify`) that validates invite `token`/`email` pairs before signup
+```bash
+# Build for production
+npm run build
 
-### Demo Mode
-The application runs in demo mode by default, which means:
-- Authentication is bypassed (any email/password works)
-- Files are stored in localStorage
-- No external API keys required for basic functionality (except OpenAI for chat)
+# Start production server
+npm start
+```
 
-## Version History
+## Upcoming Features (Roadmap)
 
-### Version 2.1 (Latest)
-**Major Updates & New Features:**
+### Feature 1: Advanced Agent Capabilities
 
-#### 🔐 Authentication System
-- Added complete login/early access pages with form validation
-- Implemented demo mode for easy testing
-- Auto-redirect functionality between auth and main app
+#### 1. Code Sandbox
+- Execute Python, JavaScript, TypeScript, Bash
+- File creation and manipulation (PPT, DOC, PDF)
+- Internet access from sandbox
+- Resource limits and security
 
-#### 📁 Advanced File Management
-- **Upload Modal**: Responsive drag & drop interface
-- **File Storage System**: Persistent storage with metadata
-- **Multi-source Support**: Local files, Google Drive, OneDrive placeholders
-- **File Type Detection**: Support for PDF, DOCX, images, videos, markdown, text
-- **Real-time Updates**: Instant UI refresh on file operations
+#### 2. Infinite Context
+- Automatic conversation summarization
+- Hierarchical context storage
+- Smart retrieval from Mem0
+- Token optimization
 
-#### 💬 Enhanced Chat Management
-- **Dynamic Chat Creation**: New Chat button creates actual chat sessions with unique IDs
-- **Chat History Scroll**: Improved scrolling in sidebar with proper height constraints
-- **Delete Functionality**: Individual delete buttons for each chat in sidebar and main interface
-- **Active Chat Highlighting**: Current chat is highlighted in the sidebar
-- **Dynamic Chat Titles**: Chat interface shows actual chat titles from sidebar
+#### 3. Subagent System
+- Task decomposition
+- Specialized agent spawning (Research, Code, Data, Document, Integration)
+- Multi-agent orchestration
+- Result aggregation
 
-#### 🎨 Enhanced User Interface
-- **Collapsible Sidebar**: Space-efficient navigation design
-- **Responsive Upload Modal**: Works seamlessly across all screen sizes
-- **Color-coded File Icons**: Visual file type identification
-- **Improved Layout**: Reordered sidebar sections for better UX
-- **Confirmation Dialogs**: Safety prompts for destructive actions
+#### 4. Skills Framework
+- Document generation (PowerPoint, Word, PDF)
+- Data analysis and visualization
+- Web automation
+- Code operations (debugging, testing, refactoring)
+- Custom user-defined skills
 
-#### 🛠️ Technical Improvements
-- **File Storage Utility**: Complete CRUD operations for file management
-- **Enhanced Components**: Updated UI components with better accessibility
-- **Mobile Optimization**: Improved responsive design for all devices
-- **Error Handling**: Better user feedback and error management
-- **Hydration Fixes**: Resolved Next.js server-side rendering issues
-- **State Management**: Proper synchronization between sidebar and chat interface
+#### 5. LLM Ensemble
+- Automatic model selection based on task complexity
+- Cost optimization
+- Performance tracking
+- Fallback mechanisms
 
-### Version 2.0
-- Authentication system with login/early access pages
-- Advanced file management with upload modal
-- Responsive design improvements
-- File storage utility implementation
-- Enhanced UI components
-
-### Version 1.0 (Initial Release)
-- Basic AI chat functionality with OpenAI integration
-- Simple file upload capabilities
-- Discover page for document management
-- Basic sidebar navigation
-- Core chat interface with message history
+See the detailed [Implementation Plan](#) for phases and timeline.
 
 ## Troubleshooting
 
-### Hydration Errors
-If you encounter Next.js hydration errors:
-- The app includes client-side rendering fixes to prevent server/client mismatches
-- Loading states are implemented to ensure consistent rendering
-- All interactive components are properly hydrated before user interaction
+### Common Issues
 
-### Common Issues & Fixes
-- **Chat not creating**: Ensure you're clicking "New Chat" button, not just typing
-- **Delete buttons not visible**: Hover over chat items in sidebar to see delete options
-- **Upload modal not opening**: Check that the "Upload Sources" button in sidebar is clicked
-- **Files not appearing**: Use the refresh button in discover page after uploading
+**MongoDB Connection Failed**
+- Check `MONGODB_URI` in `.env`
+- Verify network access in MongoDB Atlas
+- Ensure IP whitelist includes your IP
 
-### Development Notes
-- Demo mode bypasses authentication for easy testing
-- Files are stored in localStorage for demo purposes
-- Chat history persists until browser data is cleared
-- All API calls require OPENAI_API_KEY environment variable
+**LLM API Errors**
+- Verify API keys are correct
+- Check API key permissions
+- Monitor rate limits
+
+**OAuth Integration Not Working**
+- Check redirect URIs match exactly
+- Verify OAuth credentials in `.env`
+- Run `npm run check-integrations`
+- See [INTEGRATION_SETUP.md](INTEGRATION_SETUP.md)
+
+**Chat Not Loading**
+- Check browser console for errors
+- Verify user is authenticated
+- Check MongoDB connection
+
+**Tools Not Being Used**
+- Check console for tool loading errors
+- Verify required API keys (SERPAPI_KEY, MEM0_API_KEY)
+- Update system prompt if needed
+
+### Development Tips
+
+- **Clear cache**: Delete `.next` folder and restart
+- **Check logs**: Monitor console for `[TOOLS]`, `[MCP]`, `[MEMORY]` logs
+- **Test tools**: Use specific prompts to trigger tools
+- **Debug auth**: Check NextAuth logs in terminal
+
+## Performance Optimization
+
+- **Prompt caching**: Reduces LLM costs by 75-90%
+- **MongoDB indexes**: Fast query performance
+- **Lazy loading**: MCP tools loaded only if user has integrations
+- **Streaming**: Real-time response display
+- **Mem0 fire-and-forget**: Non-blocking memory storage
+
+## Security
+
+- **JWT sessions**: Secure stateless authentication
+- **Password hashing**: bcrypt with salt
+- **OAuth tokens**: Encrypted in database (production)
+- **Input validation**: Server-side and client-side
+- **Rate limiting**: Middleware protection
+- **Secure sharing**: Unique tokens for shared chats
+- **Environment variables**: Never committed to Git
 
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Make your changes
 4. Add tests if applicable
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
+5. Commit: `git commit -m 'Add amazing feature'`
+6. Push: `git push origin feature/amazing-feature`
 7. Submit a pull request
+
+### Development Guidelines
+
+- Follow existing code patterns
+- Use TypeScript for type safety
+- Add comprehensive error handling
+- Update documentation (README, tool docs)
+- Test thoroughly before committing
+- Use conventional commit messages
 
 ## License
 
@@ -298,6 +602,20 @@ MIT License - see LICENSE file for details
 ## Support
 
 For support, questions, or feature requests:
-- Open an issue on GitHub
-- Check the documentation in the README
-- Review the component examples in the codebase
+- Open an issue on [GitHub](https://github.com/badarivishal2002/Chat-bot/issues)
+- Check the documentation in this README
+- Review [app/tools/README.md](app/tools/README.md) for tool-specific help
+- See [INTEGRATION_SETUP.md](INTEGRATION_SETUP.md) for OAuth setup
+
+## Acknowledgments
+
+- Built with [Next.js](https://nextjs.org/)
+- Powered by [Vercel AI SDK](https://sdk.vercel.ai/)
+- UI components from [shadcn/ui](https://ui.shadcn.com/)
+- Memory by [Mem0 AI](https://mem0.ai/)
+- Authentication by [NextAuth](https://next-auth.js.org/)
+- Icons by [Lucide](https://lucide.dev/)
+
+---
+
+**Built with the vision of creating an intelligent, context-aware AI agent that learns and adapts to user needs.**
