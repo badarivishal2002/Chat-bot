@@ -1,6 +1,6 @@
 "use client"
 
-import React, { type ReactNode } from 'react'
+import React, { useState, type ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -9,6 +9,7 @@ import { CodeBlock } from '../code-block'
 import { ToolCallCard } from '../tool-call-card'
 import { detectArtifact } from '@/lib/artifact-detector'
 import type { Artifact } from '../artifact-panel'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 
 interface MessageItemProps {
   message: any
@@ -46,6 +47,8 @@ export function MessageItem({
   onOpenArtifact,
   renderToolContent
 }: MessageItemProps) {
+  const [showTools, setShowTools] = useState(false)
+
   const textParts = Array.isArray(message.parts)
     ? message.parts.filter((part: any) => part.type === 'text')
     : []
@@ -201,14 +204,40 @@ export function MessageItem({
               return null
             }
             if (typeof (part as any).type === 'string' && (part as any).type.startsWith('tool-')) {
-              return (
-                <div key={index} className="mt-3">
-                  {renderToolContent?.(part)}
-                </div>
-              )
+              // Don't render tool calls inline - we'll show them in collapsible section below
+              return null
             }
             return null
           })}
+
+          {/* Collapsible tool usage section - ChatGPT-like */}
+          {toolParts.length > 0 && !isStreaming && (
+            <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => setShowTools(!showTools)}
+                className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+              >
+                {showTools ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+                <span className="font-medium">
+                  {showTools ? 'Hide research steps' : `Show how I researched this (${toolParts.length} ${toolParts.length === 1 ? 'step' : 'steps'})`}
+                </span>
+              </button>
+
+              {showTools && (
+                <div className="mt-3 space-y-2">
+                  {toolParts.map((part: any, index: number) => (
+                    <div key={index}>
+                      {renderToolContent?.(part)}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       ) : (
         <div className="space-y-3 text-gray-900 dark:text-white">

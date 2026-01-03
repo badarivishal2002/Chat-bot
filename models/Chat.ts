@@ -31,7 +31,7 @@ const chatSchema = new mongoose.Schema({
     type: String,
     unique: true,
     sparse: true, // Only create index for non-null values
-    default: null
+    default: undefined // Use undefined instead of null for sparse index
   },
   sharedAt: {
     type: Date,
