@@ -11,6 +11,7 @@ import { ArtifactPanel, type Artifact } from './artifact-panel'
 import { MessageItem } from './chat/message-item'
 import { MessageActions } from './chat/message-actions'
 import { ChatInput } from './chat/chat-input'
+import { ThinkingIndicator } from './chat/thinking-indicator'
 import 'katex/dist/katex.min.css'
 import { useSession } from 'next-auth/react'
 import { Menu, AlertCircle, TrendingUp, FolderInput, Share2, Link, Mail, MessageCircle } from 'lucide-react'
@@ -852,6 +853,7 @@ export function ChatInterface({ chatId, chatTitle = 'New Chat', onChatUpdate, on
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ chatId: newId, title: 'New Chat' })
         })
+
         if (resp.ok) {
           const data = await resp.json()
           isCreatingNewChat.current = true
@@ -870,11 +872,43 @@ export function ChatInterface({ chatId, chatTitle = 'New Chat', onChatUpdate, on
           router.push('/login')
           return
         } else {
-          console.error('Failed to create chat')
-          return
+          // Get error details
+          let errorMsg = `Failed to create chat (Status: ${resp.status})`
+          let errorData: any = null
+
+          try {
+            const responseText = await resp.text()
+            try {
+              errorData = JSON.parse(responseText)
+              errorMsg += ` - ${errorData.error || JSON.stringify(errorData)}`
+            } catch {
+              errorMsg += ` - ${responseText}`
+            }
+          } catch (e) {
+            errorMsg += ` - Unable to read error response`
+          }
+
+          console.error(errorMsg)
+
+          // If chat already exists (409), proceed with sending message
+          if (resp.status === 409) {
+            console.log('Chat already exists, proceeding with message...')
+            setActiveChatId(newId)
+            setCurrentChatId(newId)
+            if (typeof window !== 'undefined') {
+              window.history.replaceState(null, '', `/chat/${newId}`)
+              sessionStorage.setItem('lastActiveChatId', newId)
+            }
+            sendMessage({ role: 'user', parts, metadata: { editable: true, createdAt: new Date() } }, { body: { chatId: newId, selectedModel } })
+          } else {
+            // Show user-friendly error for other failures
+            alert(`Unable to create chat. Please try again.\n\nError: ${errorMsg}`)
+            return
+          }
         }
       } catch (err) {
         console.error('Error creating chat:', err)
+        alert(`Network error while creating chat. Please check your connection and try again.\n\nDetails: ${err instanceof Error ? err.message : String(err)}`)
         return
       }
     } else {
@@ -1249,6 +1283,15 @@ export function ChatInterface({ chatId, chatTitle = 'New Chat', onChatUpdate, on
                       </div>
                     ) : (
                       <>
+                        {/* Thinking Indicator - Show while tools are executing */}
+                        {isAssistant && isStreamingThisMessage && message.parts?.some((p: any) =>
+                          typeof p.type === 'string' && p.type.startsWith('tool-') && !p.output
+                        ) && (
+                          <div className="mb-2">
+                            <ThinkingIndicator stage="searching" />
+                          </div>
+                        )}
+
                         {/* Message Content */}
                         <MessageItem
                           message={message}
