@@ -33,7 +33,7 @@ export async function createMCPTools(context: ToolContext): Promise<Record<strin
 
       // Ensure the schema has proper structure for OpenAI
       const schema = {
-        type: 'object',
+        type: 'object' as const,
         properties: toolParams.properties || {},
         required: toolParams.required || [],
         additionalProperties: false
